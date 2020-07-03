@@ -5,12 +5,6 @@ and then a markov dictionary which is used to generate sample words with appropr
 import os
 from random import choice
 
-def not_empty(string):
-    return not string == ''
-
-def starter_pair(tup):
-    return not tup[0].islower()
-
 def listfromsample(sample_file):
     """
     puts a sample of text into a list of words (with punctuation) from start to finish
@@ -62,24 +56,11 @@ def markov_trigram_dict(iterable_trigrams):
             tri_dict[(word1, word2)] = [word3]
 
     return tri_dict
-    
 
-def decode(string):
-    pass
+def create_chain_text(tri_dict, num = 60):
     """
-    if needed, a function to prepare encoding and formatting of individual words
+    Generates a segment of text of a given length from a dictionary of trigram frequencies
     """
-
-
-def main():
-    sample_file = "speeches.txt"         
-    listwords = listfromsample(sample_file)    
-    tris = make3gram(listwords)
-
-    tri_dict = markov_trigram_dict(tris)
-
-    num = 180
-
     trikeylist = list(tri_dict.keys())
     starter_pairs = list(filter(starter_pair, trikeylist))
 
@@ -92,10 +73,57 @@ def main():
     chain_words = [chain[0][0]]
     for x, y in chain:
         chain_words.append(y)
+        if y:
+            if y[-1] == ".":
+                end_word = len(chain_words)
+            ##finding the last period in the text sample
+    try:
+        chain_words = chain_words[:end_word]
+    except:
+        pass
 
-    with open(f"NewScript{num}.txt", "w+") as f:
-        print(' '.join(chain_words), file =f)    
+    return chain_words
+
+def not_empty(string):
+    return not string == ''
+
+def starter_pair(tup):
+    return not tup[0].islower() and len(tup[0]) > 1
+
+def quit(default = ""):
+    return default == "exit" or default == "quit"    
+
+def decode(string):
+    pass
+    """
+    if needed, a function to prepare encoding and formatting of individual words
+    """
+
+def Display(tri_dict):
+    new_default = input('\nPress Enter or type length of sample (default 40) (type "exit" to exit): ')    
+    try:
+        new_default = int(new_default)
+    except:
+        pass
+    if not quit(new_default):
+        if isinstance(new_default, int):
+            chain_words = create_chain_text(tri_dict, new_default)
+        else:
+            chain_words = create_chain_text(tri_dict)
+
+        print(' '.join(chain_words))
+
+    return new_default
     
+
+def main(default = True):
+    sample_file = "speeches.txt"         
+    listwords = listfromsample(sample_file)    
+    tris = make3gram(listwords)
+    tri_dict = markov_trigram_dict(tris)
+
+    while not quit(default):
+        default = Display(tri_dict)
 
     
 
